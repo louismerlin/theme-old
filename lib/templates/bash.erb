@@ -1,0 +1,24 @@
+#
+# ~/.bashrc
+#
+
+export EDITOR="vim"
+PATH="$(ruby -e 'print Gem.user_dir')/bin:$PATH"
+export GOPATH=~/go
+export PATH="$PATH:$GOPATH/bin"
+
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
+
+eval $(thefuck --alias)
+
+alias ls='ls --color=auto'
+PS1=' \w \$ '
+source ./.config/base16-shell/base16-<%= ARGV[0] %>.<%= if $light; "light"; else "dark"; end %>.sh
+
+#
+# Aliases
+#
+
+alias pyw='source virtualenvwrapper.sh; workon $1'
+alias agepxen1='ssh -p 10622 agepoly@agepxen1.epfl.ch'

@@ -1,0 +1,87 @@
+#!/usr/bin/env ruby
+require 'erb'
+path = $LOAD_PATH.select{|i| i.include?("theme") && i.include?("lib")}[0]
+
+def genBackground()
+  require 'chunky_png'
+  w = 48
+  h = 27
+  png = ChunkyPNG::Image.new(w, h, ChunkyPNG::Color.from_hex($theme["base00"]))
+  (h-1).times{|i| (w/2).times { |j|
+    if Random.rand(2)==0
+      png[j,i] = ChunkyPNG::Color.from_hex($theme["base07"])
+      png[w-j-1,i] = ChunkyPNG::Color.from_hex($theme["base07"])
+    end
+  }}
+  png.save(ENV['HOME']+'/Pictures/theme.png')
+end
+
+$flavor = ARGV[0].to_s
+
+if $flavor == ""
+	puts "Themes :\n3024\nAtelier Cave\nAtelier dune\nAtelier lakeside\nAtelier seaside\nAtelier sulphurpool\nBespin\nBright\nChalk\nDefault\nEighties\nFlat\nGrayscale\nGreenscreen\nIsotope\nMarrakesh\nMocha\nMonokai\nOcean\nParaiso\nShapeshifter\nSolarized\nTomorrow\n"
+	exit
+end
+
+if ARGV[1].to_s == "light"
+	$light = true
+else
+	$light = false
+end
+
+if File.file?(path+"/flavors/"+$flavor+".rb")
+  require 'flavors/'+$flavor+'.rb'
+
+	if $light
+		t0 = $theme["base00"]
+		t1 = $theme["base01"]
+		t2 = $theme["base02"]
+		t3 = $theme["base03"]
+		$theme["base00"] = $theme["base07"]
+		$theme["base01"] = $theme["base06"]
+		$theme["base02"] = $theme["base05"]
+		$theme["base03"] = $theme["base04"]
+		$theme["base04"] = t3
+		$theme["base05"] = t2
+		$theme["base06"] = t1
+		$theme["base07"] = t0
+	end
+
+  # urxvt
+  File.open(ENV['HOME']+'/.Xresources', "w") { |f|
+    f.write(ERB.new(File.read(path+'/templates/urxvt.erb')).result())
+  }
+  `xrdb ~/.Xresources`
+
+  # i3
+  File.open(ENV['HOME']+'/.config/i3/config', "w") { |f|
+    f.write(ERB.new(File.read(path+'/templates/i3.erb')).result())
+  }
+  File.open(ENV['HOME']+'/.config/i3status/config', "w") { |f|
+    f.write(ERB.new(File.read(path+'/templates/i3status.erb')).result())
+  }
+  `i3 reload`
+
+  # firefox
+  File.open(ENV['HOME']+'/.config/www/base16.css', "w") { |f|
+    f.write(ERB.new(File.read(path+'/templates/css.erb')).result())
+  }
+
+  # background
+  genBackground()
+  `feh --bg-scale --force-aliasing #{ENV['HOME']}/Pictures/theme.png`
+
+	# bash
+	File.open(ENV['HOME']+'/.bashrc', "w") { |f|
+		f.write(ERB.new(File.read(path+'/templates/bash.erb')).result())
+	}
+
+	# vim
+	File.open(ENV['HOME']+'/.vimrc', "w") { |f|
+		f.write(ERB.new(File.read(path+'/templates/vim.erb')).result())
+	}
+
+else
+  puts "Theme does not exist !"
+end
+

@@ -1,0 +1,16 @@
+set nocompatible
+filetype on
+filetype plugin indent on
+"set laststatus=2
+syntax on
+execute pathogen#infect()
+"set list
+set number
+set autoindent
+set noexpandtab
+set tabstop=2
+set shiftwidth=2
+set background=<%= if $light; "light"; else "dark"; end %>
+let base16colorspace=256
+colorscheme base16-<%= $flavor %>
+map <C-n> :NERDTreeToggle<CR>
